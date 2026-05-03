@@ -29,6 +29,7 @@ func main() {
 
 	rootCmd.AddCommand(initCmd())
 	rootCmd.AddCommand(analyzeCmd())
+	rootCmd.AddCommand(postPRCmd())
 
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
