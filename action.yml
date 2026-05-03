@@ -1,0 +1,51 @@
+name: 'GraphQL Painkiller PR Review'
+description: 'Post GraphQL static analysis findings as PR review comments'
+branding:
+  icon: 'shield'
+  color: 'red'
+
+inputs:
+  github-token:
+    description: 'GitHub token for posting review comments'
+    required: true
+    default: ${{ github.token }}
+  config-path:
+    description: 'Path to gql-painkiller config file'
+    required: false
+    default: 'gql-painkiller.config.yaml'
+  analyze-path:
+    description: 'Path to analyze for GraphQL files'
+    required: false
+    default: '.'
+  fail-on:
+    description: 'Minimum severity to fail CI (info, warning, high, critical)'
+    required: false
+    default: 'high'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Run GraphQL Painkiller
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+      run: |
+        # Build from source if binary not present
+        if [ ! -f "./gql-painkiller" ]; then
+          go build -o gql-painkiller ./cmd/gql-painkiller
+        fi
+
+        # Build from source if binary not present
+        if [ ! -f "./gql-painkiller" ]; then
+          go build -o gql-painkiller ./cmd/gql-painkiller
+        fi
+
+        # Post findings as PR review comments (always runs)
+        ./gql-painkiller post-pr-comments ${{ inputs.analyze-path }} \
+          --config ${{ inputs.config-path }} \
+          --token "$GITHUB_TOKEN"
+
+        # Fail CI if severity threshold is met
+        ./gql-painkiller analyze ${{ inputs.analyze-path }} \
+          --config ${{ inputs.config-path }} \
+          --fail-on ${{ inputs.fail-on }}
