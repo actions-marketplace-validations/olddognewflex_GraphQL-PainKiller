@@ -1,0 +1,15 @@
+query DeepQuery {
+  organization {
+    units {
+      departments {
+        teams {
+          members {
+            profile {
+              settings
+            }
+          }
+        }
+      }
+    }
+  }
+}
