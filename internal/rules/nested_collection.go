@@ -24,16 +24,29 @@ func NestedCollection(fields []models.FieldInfo, doc extractors.Document, cfg co
 
 			path := field.Path + "." + child.Name
 
-			findings = append(findings, models.Finding{
-				RuleID:      "POTENTIAL_N_PLUS_ONE",
-				Severity:    severity.High,
-				Message:     fmt.Sprintf("%s may cause resolver fan-out when %s returns many records.", path, field.Name),
-				FilePath:    doc.FilePath,
-				Line:        AdjustedLine(doc.StartLine, child.Line),
-				Path:        path,
-				ScoreImpact: 3,
-				Suggestion:  "Confirm batching/DataLoader behavior or avoid nested selection when not needed.",
-			})
+			if LooksCollectionLike(child, cfg) {
+				findings = append(findings, models.Finding{
+					RuleID:      "NESTED_COLLECTION_N_PLUS_ONE",
+					Severity:    severity.High,
+					Message:     fmt.Sprintf("%s is a collection nested under collection %s — likely N+1 resolver fan-out.", path, field.Name),
+					FilePath:    doc.FilePath,
+					Line:        AdjustedLine(doc.StartLine, child.Line),
+					Path:        path,
+					ScoreImpact: 3,
+					Suggestion:  "Add pagination, use DataLoader/batching, or avoid nested collection selection.",
+				})
+			} else {
+				findings = append(findings, models.Finding{
+					RuleID:      "NESTED_OBJECT_UNDER_COLLECTION",
+					Severity:    severity.Warning,
+					Message:     fmt.Sprintf("%s resolves per record in %s — potential fan-out if not batched.", path, field.Name),
+					FilePath:    doc.FilePath,
+					Line:        AdjustedLine(doc.StartLine, child.Line),
+					Path:        path,
+					ScoreImpact: 1,
+					Suggestion:  "Confirm this resolver uses batching or is inexpensive per-record.",
+				})
+			}
 		}
 	}
 
