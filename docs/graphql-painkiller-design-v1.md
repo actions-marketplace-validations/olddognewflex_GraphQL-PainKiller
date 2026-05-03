@@ -115,3 +115,158 @@ Detect deeply nested queries.
   "maxDepth": 5
 }
 ```
+### 2. Collection Detection
+
+Identify likely list fields using:
+
+- naming (items, nodes, plural fields)
+- schema (if provided)
+
+### 3. Missing Pagination
+
+Flag collection-like fields without:
+
+- first
+- last
+- limit
+- take
+- pageSize
+- after / before  
+
+### 4. Nested Collection Risk (N+1 Heuristic)
+
+Detect patterns like:
+```gql
+posts {
+  comments {
+    author {
+      name
+    }
+  }
+}
+```
+
+Flag:
+
+	Potential resolver fan-out (N+1 risk)
+
+### 5. Large Selection Set
+
+  Too many fields under a collection:
+
+```json
+{
+  "maxCollectionSelectionFields": 8
+}
+```
+
+### 6. Expensive Field Patterns
+Configurable
+```json
+[
+  "comments",
+  "history",
+  "events",
+  "logs",
+  "charges",
+  "payments",
+  "inspections",
+  "accounts"
+]
+```
+
+### 7. Known Resolver Risk (🔥 Differentiator)
+Team-defined risk map:
+
+```json
+{
+  "knownResolvers": {
+    "posts.comments": {
+      "risk": "high",
+      "reason": "Resolver runs per post"
+    }
+  }
+}
+```
+
+Enables **deterministic warnings** instead of heuristics.
+
+#### Risk Scoring
+
+Each rule contributes to a score:
+```
+riskScore = sum(ruleImpacts)
+```
+
+Severity:
+
+- 0–3 → Low
+- 4–6 → Medium
+- 7–8 → High
+- 9–10 → Critical
+
+### Config File
+```json
+{
+  "rules": {
+    "maxDepth": 5,
+    "maxCollectionSelectionFields": 8,
+    "requirePagination": true,
+    "failOnSeverity": "high"
+  },
+  "paginationArgs": ["first", "last", "limit", "take", "pageSize"],
+  "collectionFieldPatterns": ["items", "nodes", "edges"],
+  "expensiveFieldPatterns": [
+    "comments",
+    "history",
+    "events",
+    "logs",
+    "charges",
+    "payments",
+    "inspections",
+    "accounts"
+  ],
+  "knownResolvers": {}
+}
+```
+
+## CLI Commands
+```
+gql-painkiller init
+gql-painkiller analyze ./queries
+gql-painkiller analyze . --changed-only
+gql-painkiller analyze . --json
+gql-painkiller analyze . --fail-on high
+```
+
+### GitHub Action
+```yaml
+name: GraphQL Painkiller
+
+on:
+  pull_request:
+    paths:
+      - "**/*.graphql"
+      - "**/*.ts"
+      - "**/*.tsx"
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: olddognewflex/graphql-painkiller-action@v1
+```
+
+## Architecture (V1)
+```
+src/
+├── cli.ts
+├── action.ts
+├── extractors/
+├── analyzer/
+├── rules/
+├── reporters/
+├── github/
+└── config/
+```
