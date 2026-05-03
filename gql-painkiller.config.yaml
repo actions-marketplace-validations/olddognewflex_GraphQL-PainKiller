@@ -1,0 +1,40 @@
+rules:
+  maxDepth: 5
+  maxCollectionSelectionFields: 8
+  requirePagination: true
+  failOnSeverity: high
+
+paginationArgs:
+  - first
+  - last
+  - limit
+  - take
+  - pageSize
+  - after
+  - before
+  - offset
+
+collectionFieldPatterns:
+  - items
+  - nodes
+  - edges
+
+expensiveFieldPatterns:
+  - comments
+  - history
+  - events
+  - logs
+  - charges
+  - payments
+  - inspections
+  - accounts
+  - permissions
+  - audit
+
+knownResolvers:
+  posts.comments:
+    risk: high
+    reason: comments may resolve once per post unless batched
+  posts.comments.author:
+    risk: critical
+    reason: author nested under comments can fan out again without DataLoader/batching

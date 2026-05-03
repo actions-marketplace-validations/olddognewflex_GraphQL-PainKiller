@@ -1,0 +1,38 @@
+# Binary
+/gql-painkiller
+
+# Go build artifacts
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Output of go coverage
+*.cover
+*.cov
+coverage.html
+
+# Dependency directories
+vendor/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env files
+.env
+.env.local
+
+# Temporary files
+/tmp/
+*.tmp

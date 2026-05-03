@@ -1,0 +1,14 @@
+query GetPosts {
+  posts {
+    id
+    title
+    comments {
+      id
+      body
+      author {
+        id
+        name
+      }
+    }
+  }
+}

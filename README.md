@@ -1,117 +1,64 @@
-# GraphQL Painkiller — V1
+# GraphQL Painkiller
 
-## TL;DR
+Zero-runtime static analysis for risky GraphQL query patterns.
 
-GraphQL Painkiller is a zero-runtime static analysis tool that detects risky GraphQL query patterns in pull requests and flags them before they are merged.
+V1 is a Go CLI that scans:
 
-It works as:
-- A CLI tool
-- A GitHub Action that leaves PR review comments
+- `.graphql`
+- `.gql`
+- `gql` tagged template literals
+- `/* GraphQL */` template literals
 
----
+It flags likely:
 
-## Core Problem
+- deep queries
+- missing pagination
+- nested collection / N+1 risks
+- expensive field names
+- large selection sets under collection-like fields
+- team-defined known resolver risks
 
-GraphQL performance issues are:
-- Hard to detect before runtime
-- Often caused by query shape (not code)
-- Invisible during code review
-
-AI tools (Codex, GPT) can suggest improvements, but they:
-- Do not analyze actual query structure deterministically
-- Do not understand runtime fan-out risks
-- Cannot enforce standards in CI
-
----
-
-## Core Value Proposition
-
-> Catch expensive GraphQL queries before they hit production.
-
----
-
-## Product Shape
-
-### Mode 1 — CLI
+## Build
 
 ```bash
-gql-painkiller analyze ./queries
+go mod tidy
+go build -o gql-painkiller ./cmd/gql-painkiller
 ```
 
-### Mode 2 - GitHub Action
+## Run
 
-```yaml
-- uses: olddognewflex/graphql-painkiller-action@v1
+```bash
+./gql-painkiller analyze ./examples
 ```
 
-## V1 Capabilities
+JSON output:
 
-### Input Sources
-
-- .graphql, .gql files
-- Tagged template literals:
-
-```typescript
-gql`
-  query GetPosts {
-    posts {
-      comments {
-        id
-      }
-    }
-  }`
+```bash
+./gql-painkiller analyze ./examples --json
 ```
 
-- Comment based template
-  
-```typescript
-const query = /* GraphQL */ `
-  query GetPosts {
-    posts {
-      comments {
-        id
-      }
-    }
-  }
-`;
+Fail CI on high findings:
+
+```bash
+./gql-painkiller analyze ./examples --fail-on high
 ```
 
-### Output
+Create default config:
 
-#### CLI
-```
-GraphQL Painkiller Report
-
-Operation: GetPosts
-Risk Score: 8/10 — High
-
-Findings:
-- Potential N+1 path: posts.comments
-- Missing pagination on posts
-- Large selection set under posts
+```bash
+./gql-painkiller init
 ```
 
-#### GitHub PR Comment
-```
-⚠️ Potential N+1 risk
+## Philosophy
 
-posts → comments may trigger resolver fan-out.
+GraphQL Painkiller does not pretend to know runtime truth from static analysis.
 
-Suggestions:
-- Add pagination
-- Batch resolver
-- Avoid nested selection if unnecessary
-```
+It says things like:
 
-## Rule Engine (V1)
+- likely
+- potential
+- may cause
 
-### 1. Max Depth
+Unless the path is configured in `knownResolvers`, which represents team-owned knowledge.
 
-Detect deeply nested queries.
-
-**Config**:
-```json
-{
-  "maxDepth": 5
-}
-```
+That distinction matters. Otherwise we’re just inventing performance astrology with a compiler badge.
