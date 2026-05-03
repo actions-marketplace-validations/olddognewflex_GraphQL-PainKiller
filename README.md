@@ -36,3 +36,43 @@ AI tools (Codex, GPT) can suggest improvements, but they:
 
 ```bash
 gql-painkiller analyze ./queries
+```
+
+### Mode 2 - GitHub Action
+
+```yaml
+- uses: olddognewflex/graphql-painkiller-action@v1
+```
+
+## V1 Capabilities
+
+### Input Sources
+
+- .graphql, .gql files
+- Tagged template literals:
+
+```typescript
+gql`
+  query GetPosts {
+    posts {
+      comments {
+        id
+      }
+    }
+  }`
+```
+
+- Comment based template
+  
+```typescript
+const query = /* GraphQL */ `
+  query GetPosts {
+    posts {
+      comments {
+        id
+      }
+    }
+  }
+`;
+```
+
