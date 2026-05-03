@@ -76,3 +76,42 @@ const query = /* GraphQL */ `
 `;
 ```
 
+### Output
+
+#### CLI
+```
+GraphQL Painkiller Report
+
+Operation: GetPosts
+Risk Score: 8/10 — High
+
+Findings:
+- Potential N+1 path: posts.comments
+- Missing pagination on posts
+- Large selection set under posts
+```
+
+#### GitHub PR Comment
+```
+⚠️ Potential N+1 risk
+
+posts → comments may trigger resolver fan-out.
+
+Suggestions:
+- Add pagination
+- Batch resolver
+- Avoid nested selection if unnecessary
+```
+
+## Rule Engine (V1)
+
+### 1. Max Depth
+
+Detect deeply nested queries.
+
+**Config**:
+```json
+{
+  "maxDepth": 5
+}
+```
