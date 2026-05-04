@@ -90,8 +90,8 @@ func TestBuildReviewComments(t *testing.T) {
 			want: 1,
 			check: func(t *testing.T, comments []ReviewComment) {
 				c := comments[0]
-				if !strings.Contains(c.Body, "https://graphql.org/learn/pagination/") {
-					t.Errorf("Body should contain docs URL, got: %q", c.Body)
+				if !strings.Contains(c.Body, "[Why this matters](https://graphql.org/learn/pagination/)") {
+					t.Errorf("Body should contain docs link, got: %q", c.Body)
 				}
 			},
 		},

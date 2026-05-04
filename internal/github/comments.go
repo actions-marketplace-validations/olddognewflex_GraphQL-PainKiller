@@ -32,7 +32,7 @@ func BuildReviewComments(reports []models.Report) []ReviewComment {
 			finding.Suggestion,
 		)
 		if finding.DocsURL != "" {
-			body += fmt.Sprintf("\n\n**Docs:** %s", finding.DocsURL)
+			body += fmt.Sprintf("\n\n📖 [Why this matters](%s)", finding.DocsURL)
 		}
 
 			comments = append(comments, ReviewComment{
