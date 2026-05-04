@@ -30,22 +30,16 @@ runs:
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}
       run: |
-        # Build from source if binary not present
+        set -e
+
         if [ ! -f "./gql-painkiller" ]; then
           go build -o gql-painkiller ./cmd/gql-painkiller
         fi
 
-        # Build from source if binary not present
-        if [ ! -f "./gql-painkiller" ]; then
-          go build -o gql-painkiller ./cmd/gql-painkiller
-        fi
-
-        # Post findings as PR review comments (always runs)
         ./gql-painkiller post-pr-comments ${{ inputs.analyze-path }} \
           --config ${{ inputs.config-path }} \
           --token "$GITHUB_TOKEN"
 
-        # Fail CI if severity threshold is met
         ./gql-painkiller analyze ${{ inputs.analyze-path }} \
           --config ${{ inputs.config-path }} \
           --fail-on ${{ inputs.fail-on }}

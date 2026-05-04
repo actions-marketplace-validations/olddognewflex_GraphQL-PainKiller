@@ -76,8 +76,8 @@ For local testing or other CI systems, use --owner, --repo, --pr, and --commit f
 
 			fmt.Fprintf(cmd.OutOrStdout(), "Posting %d review comments to %s/%s#%d...\n", len(comments), meta.Owner, meta.Repo, meta.Number)
 
-			if err := client.PostReviewComments(ctx, meta.Owner, meta.Repo, meta.Number, comments, meta.CommitSHA); err != nil {
-				return fmt.Errorf("failed to post review comments: %w", err)
+			if err := client.PostReview(ctx, meta.Owner, meta.Repo, meta.Number, comments, meta.CommitSHA); err != nil {
+				return fmt.Errorf("failed to post review: %w", err)
 			}
 
 			fmt.Fprintln(cmd.OutOrStdout(), "Done.")
