@@ -30,6 +30,7 @@ func main() {
 	rootCmd.AddCommand(initCmd())
 	rootCmd.AddCommand(analyzeCmd())
 	rootCmd.AddCommand(postPRCmd())
+	rootCmd.AddCommand(postPRSummaryCmd())
 
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
@@ -109,12 +110,15 @@ func analyzeCmd() *cobra.Command {
 	}
 
 	cmd.Flags().BoolVar(&jsonOutput, "json", false, "emit JSON report")
-	cmd.Flags().StringVar(&failOn, "fail-on", "", "override fail severity: info, warning, high, critical")
+	cmd.Flags().StringVar(&failOn, "fail-on", "", "override fail severity: none, info, warning, high, critical")
 
 	return cmd
 }
 
 func shouldFail(reports []models.Report, threshold severity.Severity) bool {
+	if threshold == severity.None {
+		return false
+	}
 	for _, report := range reports {
 		for _, finding := range report.Findings {
 			if severity.GTE(finding.Severity, threshold) {

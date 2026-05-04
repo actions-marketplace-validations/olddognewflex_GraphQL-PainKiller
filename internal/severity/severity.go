@@ -3,6 +3,7 @@ package severity
 type Severity string
 
 const (
+	None     Severity = "none"
 	Info     Severity = "info"
 	Warning  Severity = "warning"
 	High     Severity = "high"
@@ -11,6 +12,8 @@ const (
 
 func Rank(s Severity) int {
 	switch s {
+	case None:
+		return -1
 	case Info:
 		return 0
 	case Warning:

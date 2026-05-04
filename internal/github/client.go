@@ -22,6 +22,18 @@ func NewClient(token string) *Client {
 	}
 }
 
+// PostSummaryComment posts a regular comment (not a review) on a PR.
+func (c *Client) PostSummaryComment(ctx context.Context, owner, repo string, prNumber int, body string) error {
+	issueComment := &github.IssueComment{
+		Body: github.String(body),
+	}
+	_, _, err := c.client.Issues.CreateComment(ctx, owner, repo, prNumber, issueComment)
+	if err != nil {
+		return fmt.Errorf("failed to create PR comment: %w", err)
+	}
+	return nil
+}
+
 func (c *Client) getChangedFiles(ctx context.Context, owner, repo string, prNumber int) (map[string]map[int]bool, error) {
 	result := make(map[string]map[int]bool)
 

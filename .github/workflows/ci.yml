@@ -1,0 +1,77 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build CLI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+          cache: true
+
+      - name: Build
+        run: go build -o gql-painkiller ./cmd/gql-painkiller
+
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+          cache: true
+
+      - name: Test
+        run: go test ./...
+
+  fixture-check:
+    name: Painkiller Fixture Check
+    runs-on: ubuntu-latest
+    needs:
+      - build
+      - test
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+          cache: true
+
+      - name: Build CLI
+        run: go build -o gql-painkiller ./cmd/gql-painkiller
+
+      - name: Run analyzer against examples
+        run: ./gql-painkiller analyze ./examples --fail-on=none
+
+      - name: Post summary comment to PR
+        if: github.event_name == 'pull_request'
+        run: ./gql-painkiller post-pr-summary ./examples
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
