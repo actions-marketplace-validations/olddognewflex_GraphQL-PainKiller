@@ -34,8 +34,8 @@ func (c *Client) PostSummaryComment(ctx context.Context, owner, repo string, prN
 	return nil
 }
 
-func (c *Client) getChangedFiles(ctx context.Context, owner, repo string, prNumber int) (map[string]map[int]bool, error) {
-	result := make(map[string]map[int]bool)
+func (c *Client) getChangedFiles(ctx context.Context, owner, repo string, prNumber int) (map[string]map[int]int, error) {
+	result := make(map[string]map[int]int)
 
 	opts := &github.ListOptions{PerPage: 100}
 	for {
@@ -76,21 +76,17 @@ func (c *Client) PostReview(ctx context.Context, owner, repo string, prNumber in
 
 	for _, comment := range comments {
 		fileLines, fileChanged := diffLines[comment.Path]
+		position, lineInDiff := fileLines[comment.Line]
 		switch {
-		case fileChanged && fileLines[comment.Line]:
+		case fileChanged && lineInDiff:
 			inline = append(inline, &github.DraftReviewComment{
-				Path: github.String(comment.Path),
-				Line: github.Int(comment.Line),
-				Side: github.String("RIGHT"),
-				Body: github.String(comment.Body),
+				Path:     github.String(comment.Path),
+				Position: github.Int(position),
+				Body:     github.String(comment.Body),
 			})
 
 		case fileChanged:
-			inline = append(inline, &github.DraftReviewComment{
-				Path:        github.String(comment.Path),
-				Body:        github.String(fmt.Sprintf("**Line %d:**\n\n%s", comment.Line, comment.Body)),
-				SubjectType: github.String("file"),
-			})
+			bodyFindings = append(bodyFindings, comment)
 
 		default:
 			bodyFindings = append(bodyFindings, comment)
@@ -123,10 +119,10 @@ func buildReviewBody(total, inlineCount int, bodyFindings []ReviewComment) strin
 		return b.String()
 	}
 
-	fmt.Fprintf(&b, "Found **%d** finding(s) — **%d** inline, **%d** in unchanged files.\n\n",
+	fmt.Fprintf(&b, "Found **%d** finding(s) — **%d** inline, **%d** in review body.\n\n",
 		total, inlineCount, len(bodyFindings))
 
-	b.WriteString("<details>\n<summary>Findings in unchanged files</summary>\n\n")
+	b.WriteString("<details>\n<summary>Findings not shown inline</summary>\n\n")
 	for _, f := range bodyFindings {
 		fmt.Fprintf(&b, "---\n\n📍 `%s` line %d\n\n%s\n\n", f.Path, f.Line, f.Body)
 	}

@@ -8,12 +8,12 @@ func TestParsePatchLines(t *testing.T) {
 	tests := []struct {
 		name      string
 		patch     string
-		wantLines map[int]bool
+		wantLines map[int]int
 	}{
 		{
 			name:      "empty patch",
 			patch:     "",
-			wantLines: map[int]bool{},
+			wantLines: map[int]int{},
 		},
 		{
 			name: "new file",
@@ -21,7 +21,7 @@ func TestParsePatchLines(t *testing.T) {
 +line 1
 +line 2
 +line 3`,
-			wantLines: map[int]bool{1: true, 2: true, 3: true},
+			wantLines: map[int]int{1: 1, 2: 2, 3: 3},
 		},
 		{
 			name: "context and additions",
@@ -32,10 +32,10 @@ func TestParsePatchLines(t *testing.T) {
 +added line 2
  context line
  context line`,
-			wantLines: map[int]bool{
-				10: true, 11: true,
-				12: true, 13: true,
-				14: true, 15: true,
+			wantLines: map[int]int{
+				10: 1, 11: 2,
+				12: 3, 13: 4,
+				14: 5, 15: 6,
 			},
 		},
 		{
@@ -45,7 +45,7 @@ func TestParsePatchLines(t *testing.T) {
 -removed
 +replaced
  context`,
-			wantLines: map[int]bool{5: true, 6: true, 7: true},
+			wantLines: map[int]int{5: 1, 6: 2, 7: 3},
 		},
 		{
 			name: "multiple hunks",
@@ -59,9 +59,9 @@ func TestParsePatchLines(t *testing.T) {
 +inserted
  line 11
  line 12`,
-			wantLines: map[int]bool{
-				1: true, 2: true, 3: true,
-				10: true, 11: true, 12: true, 13: true,
+			wantLines: map[int]int{
+				1: 1, 2: 2, 3: 3,
+				10: 4, 11: 5, 12: 6, 13: 7,
 			},
 		},
 	}
@@ -75,13 +75,18 @@ func TestParsePatchLines(t *testing.T) {
 					len(got), len(tt.wantLines), got, tt.wantLines)
 			}
 
-			for line := range tt.wantLines {
-				if !got[line] {
+			for line, wantPos := range tt.wantLines {
+				gotPos, ok := got[line]
+				if !ok {
 					t.Errorf("missing expected line %d", line)
+					continue
+				}
+				if gotPos != wantPos {
+					t.Errorf("line %d position = %d, want %d", line, gotPos, wantPos)
 				}
 			}
 			for line := range got {
-				if !tt.wantLines[line] {
+				if _, ok := tt.wantLines[line]; !ok {
 					t.Errorf("unexpected line %d", line)
 				}
 			}

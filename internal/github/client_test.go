@@ -56,8 +56,8 @@ func TestPostReview_InlineComments(t *testing.T) {
 	if first["path"] != "src/query.graphql" {
 		t.Errorf("path = %q, want %q", first["path"], "src/query.graphql")
 	}
-	if int(first["line"].(float64)) != 2 {
-		t.Errorf("line = %v, want 2", first["line"])
+	if int(first["position"].(float64)) != 2 {
+		t.Errorf("position = %v, want 2", first["position"])
 	}
 }
 
@@ -94,17 +94,20 @@ func TestPostReview_FileLevelFallback(t *testing.T) {
 		t.Fatalf("PostReview() error = %v", err)
 	}
 
-	reviewComments := reviewBody["comments"].([]interface{})
-	if len(reviewComments) != 1 {
-		t.Fatalf("expected 1 file-level comment, got %d", len(reviewComments))
+	var reviewComments []interface{}
+	if reviewBody["comments"] != nil {
+		reviewComments = reviewBody["comments"].([]interface{})
+	}
+	if len(reviewComments) != 0 {
+		t.Fatalf("expected 0 inline comments, got %d", len(reviewComments))
 	}
 
-	first := reviewComments[0].(map[string]interface{})
-	if first["subject_type"] != "file" {
-		t.Errorf("subject_type = %q, want %q", first["subject_type"], "file")
+	body := reviewBody["body"].(string)
+	if !strings.Contains(body, "src/query.graphql") {
+		t.Errorf("body should reference the file, got %q", body)
 	}
-	if !strings.Contains(first["body"].(string), "Line 99") {
-		t.Errorf("body should reference line 99, got %q", first["body"])
+	if !strings.Contains(body, "line 99") {
+		t.Errorf("body should reference line 99, got %q", body)
 	}
 }
 
@@ -142,8 +145,8 @@ func TestPostReview_UnchangedFileFallsToBody(t *testing.T) {
 	}
 
 	body := reviewBody["body"].(string)
-	if !strings.Contains(body, "unchanged files") {
-		t.Errorf("review body should mention unchanged files, got %q", body)
+	if !strings.Contains(body, "not shown inline") {
+		t.Errorf("review body should mention 'not shown inline', got %q", body)
 	}
 	if !strings.Contains(body, "src/untouched.graphql") {
 		t.Errorf("review body should reference the file, got %q", body)
@@ -193,12 +196,15 @@ func TestPostReview_MixedPlacement(t *testing.T) {
 	}
 
 	reviewComments := reviewBody["comments"].([]interface{})
-	if len(reviewComments) != 2 {
-		t.Fatalf("expected 2 inline/file-level comments, got %d", len(reviewComments))
+	if len(reviewComments) != 1 {
+		t.Fatalf("expected 1 inline comment, got %d", len(reviewComments))
 	}
 
 	body := reviewBody["body"].(string)
 	if !strings.Contains(body, "src/missing.graphql") {
 		t.Errorf("review body should reference unchanged file, got %q", body)
+	}
+	if !strings.Contains(body, "src/query.graphql") {
+		t.Errorf("review body should reference file with out-of-diff finding, got %q", body)
 	}
 }
