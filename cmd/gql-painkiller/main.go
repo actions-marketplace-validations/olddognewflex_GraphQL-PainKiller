@@ -103,7 +103,10 @@ func analyzeCmd() *cobra.Command {
 			}
 
 			if shouldFail(reports, cfg.Rules.FailOnSeverity) {
-				return fmt.Errorf("GraphQL Painkiller found findings at or above severity %q", cfg.Rules.FailOnSeverity)
+				cmd.SilenceErrors = true
+				err := fmt.Errorf("GraphQL Painkiller found findings at or above severity %q", cfg.Rules.FailOnSeverity)
+				fmt.Fprintf(cmd.ErrOrStderr(), "Error: %v\n", err)
+				return err
 			}
 
 			return nil
