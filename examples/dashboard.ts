@@ -4,26 +4,18 @@ export const GET_DASHBOARD = gql`
   query GetUserDashboard {
     user {
       id
-      assets {
+      purchased {
         items {
           id
           vin
-          buyer {
-            accountId
-            name
-          }
           seller {
             accountId
             name
           }
-          dealCharges {
+          charges {
             type
             amount
             status
-          }
-          inspections {
-            status
-            completedAt
           }
         }
       }

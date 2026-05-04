@@ -62,6 +62,7 @@ func analyzeCmd() *cobra.Command {
 		Short: "Analyze GraphQL operations",
 		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			cmd.SilenceUsage = true
 			target := "."
 			if len(args) == 1 {
 				target = args[0]
@@ -102,7 +103,10 @@ func analyzeCmd() *cobra.Command {
 			}
 
 			if shouldFail(reports, cfg.Rules.FailOnSeverity) {
-				return fmt.Errorf("GraphQL Painkiller found findings at or above severity %q", cfg.Rules.FailOnSeverity)
+				cmd.SilenceErrors = true
+				err := fmt.Errorf("GraphQL Painkiller found findings at or above severity %q", cfg.Rules.FailOnSeverity)
+				fmt.Fprintf(cmd.ErrOrStderr(), "Error: %v\n", err)
+				return err
 			}
 
 			return nil
