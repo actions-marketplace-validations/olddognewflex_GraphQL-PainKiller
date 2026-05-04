@@ -1,6 +1,7 @@
 package github
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -42,7 +43,7 @@ func TestPostReview_InlineComments(t *testing.T) {
 		{Path: "src/query.graphql", Line: 2, Body: "deep query"},
 	}
 
-	if err := client.PostReview(t.Context(), "owner", "repo", 1, comments, "sha123"); err != nil {
+	if err := client.PostReview(context.Background(), "owner", "repo", 1, comments, "sha123"); err != nil {
 		t.Fatalf("PostReview() error = %v", err)
 	}
 
@@ -89,7 +90,7 @@ func TestPostReview_FileLevelFallback(t *testing.T) {
 		{Path: "src/query.graphql", Line: 99, Body: "finding on unchanged line"},
 	}
 
-	if err := client.PostReview(t.Context(), "owner", "repo", 1, comments, "sha123"); err != nil {
+	if err := client.PostReview(context.Background(), "owner", "repo", 1, comments, "sha123"); err != nil {
 		t.Fatalf("PostReview() error = %v", err)
 	}
 
@@ -136,7 +137,7 @@ func TestPostReview_UnchangedFileFallsToBody(t *testing.T) {
 		{Path: "src/untouched.graphql", Line: 10, Body: "finding in unchanged file"},
 	}
 
-	if err := client.PostReview(t.Context(), "owner", "repo", 1, comments, "sha123"); err != nil {
+	if err := client.PostReview(context.Background(), "owner", "repo", 1, comments, "sha123"); err != nil {
 		t.Fatalf("PostReview() error = %v", err)
 	}
 
@@ -187,7 +188,7 @@ func TestPostReview_MixedPlacement(t *testing.T) {
 		{Path: "src/missing.graphql", Line: 1, Body: "body finding"},
 	}
 
-	if err := client.PostReview(t.Context(), "owner", "repo", 1, comments, "sha123"); err != nil {
+	if err := client.PostReview(context.Background(), "owner", "repo", 1, comments, "sha123"); err != nil {
 		t.Fatalf("PostReview() error = %v", err)
 	}
 
