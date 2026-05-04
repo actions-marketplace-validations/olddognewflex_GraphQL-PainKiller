@@ -24,13 +24,16 @@ func BuildReviewComments(reports []models.Report) []ReviewComment {
 				continue
 			}
 
-			body := fmt.Sprintf(
-				"⚠️ **%s**\n\n%s\n\n**Path:** `%s`\n\n**Suggestion:** %s",
-				strings.ReplaceAll(finding.RuleID, "_", " "),
-				finding.Message,
-				finding.Path,
-				finding.Suggestion,
-			)
+		body := fmt.Sprintf(
+			"⚠️ **%s**\n\n%s\n\n**Path:** `%s`\n\n**Suggestion:** %s",
+			strings.ReplaceAll(finding.RuleID, "_", " "),
+			finding.Message,
+			finding.Path,
+			finding.Suggestion,
+		)
+		if finding.DocsURL != "" {
+			body += fmt.Sprintf("\n\n**Docs:** %s", finding.DocsURL)
+		}
 
 			comments = append(comments, ReviewComment{
 				Path: finding.FilePath,

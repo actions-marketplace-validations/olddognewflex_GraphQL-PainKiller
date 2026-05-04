@@ -30,6 +30,7 @@ func LargeCollectionSelection(fields []models.FieldInfo, doc extractors.Document
 			Path:        field.Path,
 			ScoreImpact: 2,
 			Suggestion:  "Reduce selected fields or split heavy detail fields into a follow-up query.",
+			DocsURL:     "https://graphql.org/learn/performance/#demand-control",
 		})
 	}
 

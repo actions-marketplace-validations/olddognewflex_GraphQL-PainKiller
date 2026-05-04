@@ -18,16 +18,17 @@ func ExpensiveFields(fields []models.FieldInfo, doc extractors.Document, cfg con
 
 		for _, pattern := range cfg.ExpensiveFieldPatterns {
 			if strings.Contains(lower, strings.ToLower(pattern)) {
-				findings = append(findings, models.Finding{
-					RuleID:      "EXPENSIVE_FIELD_PATTERN",
-					Severity:    severity.Warning,
-					Message:     fmt.Sprintf("%s matches expensive field pattern %q.", field.Path, pattern),
-					FilePath:    doc.FilePath,
-					Line:        AdjustedLine(doc.StartLine, field.Line),
-					Path:        field.Path,
-					ScoreImpact: 1,
-					Suggestion:  "Confirm this field is necessary for this operation.",
-				})
+			findings = append(findings, models.Finding{
+				RuleID:      "EXPENSIVE_FIELD_PATTERN",
+				Severity:    severity.Warning,
+				Message:     fmt.Sprintf("%s matches expensive field pattern %q.", field.Path, pattern),
+				FilePath:    doc.FilePath,
+				Line:        AdjustedLine(doc.StartLine, field.Line),
+				Path:        field.Path,
+				ScoreImpact: 1,
+				Suggestion:  "Confirm this field is necessary for this operation.",
+				DocsURL:     "https://graphql.org/learn/performance/",
+			})
 				break
 			}
 		}

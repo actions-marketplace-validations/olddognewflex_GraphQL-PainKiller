@@ -36,6 +36,7 @@ func MissingPagination(fields []models.FieldInfo, doc extractors.Document, cfg c
 			Path:        field.Path,
 			ScoreImpact: 2,
 			Suggestion:  "Add pagination args such as first, limit, take, pageSize, after, or before.",
+			DocsURL:     "https://graphql.org/learn/pagination/",
 		})
 	}
 

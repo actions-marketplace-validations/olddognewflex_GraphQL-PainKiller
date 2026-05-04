@@ -32,5 +32,6 @@ func MaxDepth(fields []models.FieldInfo, doc extractors.Document, cfg config.Con
 		Path:        deepest.Path,
 		ScoreImpact: 2,
 		Suggestion:  "Consider splitting the operation or reducing nested selections.",
+		DocsURL:     "https://graphql.org/learn/performance/#demand-control",
 	}}
 }

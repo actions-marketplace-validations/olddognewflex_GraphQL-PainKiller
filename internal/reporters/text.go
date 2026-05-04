@@ -48,6 +48,9 @@ func Text(w io.Writer, reports []models.Report) {
 			if finding.Suggestion != "" {
 				fmt.Fprintf(w, "    Suggestion: %s\n", finding.Suggestion)
 			}
+			if finding.DocsURL != "" {
+				fmt.Fprintf(w, "    Docs: %s\n", finding.DocsURL)
+			}
 		}
 
 		fmt.Fprintln(w)

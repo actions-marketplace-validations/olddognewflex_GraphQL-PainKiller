@@ -69,6 +69,33 @@ func TestBuildReviewComments(t *testing.T) {
 			},
 		},
 		{
+			name: "finding with docs url includes it in body",
+			reports: []models.Report{
+				{
+					FilePath: "test.graphql",
+					Findings: []models.Finding{
+						{
+							RuleID:     "MISSING_PAGINATION",
+							Message:    "Missing pagination",
+							FilePath:   "test.graphql",
+							Line:       10,
+							Path:       "posts",
+							Suggestion: "Add pagination",
+							Severity:   severity.High,
+							DocsURL:    "https://graphql.org/learn/pagination/",
+						},
+					},
+				},
+			},
+			want: 1,
+			check: func(t *testing.T, comments []ReviewComment) {
+				c := comments[0]
+				if !strings.Contains(c.Body, "https://graphql.org/learn/pagination/") {
+					t.Errorf("Body should contain docs URL, got: %q", c.Body)
+				}
+			},
+		},
+		{
 			name: "finding with line 0 is skipped",
 			reports: []models.Report{
 				{

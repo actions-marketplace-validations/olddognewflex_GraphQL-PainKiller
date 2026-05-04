@@ -20,6 +20,7 @@ type Finding struct {
 	Path        string            `json:"path,omitempty"`
 	ScoreImpact int               `json:"scoreImpact"`
 	Suggestion  string            `json:"suggestion,omitempty"`
+	DocsURL     string            `json:"docsUrl,omitempty"`
 }
 
 type Report struct {
