@@ -62,6 +62,7 @@ func analyzeCmd() *cobra.Command {
 		Short: "Analyze GraphQL operations",
 		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			cmd.SilenceUsage = true
 			target := "."
 			if len(args) == 1 {
 				target = args[0]
