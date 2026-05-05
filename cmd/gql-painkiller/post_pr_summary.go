@@ -10,14 +10,16 @@ import (
 	"github.com/olddognewflex/graphql-painkiller/internal/github"
 	"github.com/olddognewflex/graphql-painkiller/internal/models"
 	"github.com/olddognewflex/graphql-painkiller/internal/reporters"
+	"github.com/olddognewflex/graphql-painkiller/internal/severity"
 	"github.com/spf13/cobra"
 )
 
 var (
-	summaryOwner     string
-	summaryRepo      string
-	summaryNumber    int
-	summaryToken     string
+	summaryOwner  string
+	summaryRepo   string
+	summaryNumber int
+	summaryToken  string
+	summaryFailOn string
 )
 
 func postPRSummaryCmd() *cobra.Command {
@@ -77,6 +79,18 @@ For local testing or other CI systems, use --owner, --repo, and --pr flags.`,
 			}
 
 			fmt.Fprintln(cmd.OutOrStdout(), "Done.")
+
+			if summaryFailOn != "" {
+				cfg.Rules.FailOnSeverity = severity.Severity(summaryFailOn)
+			}
+
+			if shouldFail(reports, cfg.Rules.FailOnSeverity) {
+				cmd.SilenceErrors = true
+				err := fmt.Errorf("GraphQL Painkiller found findings at or above severity %q", cfg.Rules.FailOnSeverity)
+				fmt.Fprintf(cmd.ErrOrStderr(), "Error: %v\n", err)
+				return err
+			}
+
 			return nil
 		},
 	}
@@ -85,6 +99,7 @@ For local testing or other CI systems, use --owner, --repo, and --pr flags.`,
 	cmd.Flags().StringVar(&summaryRepo, "repo", "", "repository name (overrides env detection)")
 	cmd.Flags().IntVar(&summaryNumber, "pr", 0, "pull request number (overrides env detection)")
 	cmd.Flags().StringVar(&summaryToken, "token", "", "GitHub token (defaults to GITHUB_TOKEN env var)")
+	cmd.Flags().StringVar(&summaryFailOn, "fail-on", "", "override fail severity: none, info, warning, high, critical")
 
 	return cmd
 }
