@@ -102,19 +102,33 @@ name: GraphQL Painkiller
 on:
   pull_request:
     paths:
-      - '**/*.graphql'
-      - '**/*.ts'
-      - '**/*.tsx'
-
+      - "**/*.graphql"
+      - "**/*.gql"
+      - "**/*.ts"
+      - "**/*.tsx"
+      - "gql-painkiller.config.yaml"
+      - ".github/workflows/graphql-painkiller.yml"
 jobs:
   analyze:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - uses: actions/checkout@v3
-      - name: Run GraphQL Painkiller
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+      - name: Run GraphQL PainKiller
         run: |
-          go install github.com/olddognewflex/GraphQL-PainKiller/cmd/gql-painkiller@latest
-          gql-painkiller analyze ./src --format=github
+          go install github.com/olddognewflex/graphql-painkiller/cmd/gql-painkiller@latest
+          export PATH=$PATH:$(go env GOPATH)/bin
+          gql-painkiller post-pr-comments ./src \
+            --config ./app/gql-painkiller.config.yaml \
+            --fail-on=high
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 ---
