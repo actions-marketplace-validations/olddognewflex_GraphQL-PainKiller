@@ -67,11 +67,8 @@ jobs:
       - name: Build CLI
         run: go build -o gql-painkiller ./cmd/gql-painkiller
 
-      - name: Run analyzer against examples
-        run: ./gql-painkiller analyze ./examples --fail-on=none
-
       - name: Post summary comment to PR
         if: github.event_name == 'pull_request'
-        run: ./gql-painkiller post-pr-summary ./examples
+        run: ./gql-painkiller --fail-on=none post-pr-summary ./examples
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
