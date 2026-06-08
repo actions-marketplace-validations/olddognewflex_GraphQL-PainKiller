@@ -66,11 +66,17 @@ GraphQL Painkiller is:
 
 ### Install
 
+**Prebuilt binaries (recommended)**
+
+Grab the archive for your OS/arch from the [latest release](https://github.com/olddognewflex/GraphQL-PainKiller/releases/latest), extract, and put `gql-painkiller` on your `PATH`. Builds for linux/darwin/windows × amd64/arm64.
+
+**go install**
+
 ```bash
-go install github.com/olddognewflex/GraphQL-PainKiller/cmd/gql-painkiller@latest
+go install github.com/olddognewflex/graphql-painkiller/cmd/gql-painkiller@latest
 ```
 
-or build locally:
+**Build locally**
 
 ```bash
 git clone git@github.com:olddognewflex/GraphQL-PainKiller.git
