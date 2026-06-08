@@ -19,10 +19,18 @@ var (
 	failOn     string
 )
 
+// Set via ldflags at build time (see .goreleaser.yaml).
+var (
+	version = "dev"
+	commit  = "none"
+	date    = "unknown"
+)
+
 func main() {
 	rootCmd := &cobra.Command{
-		Use:   "gql-painkiller",
-		Short: "Static analysis for risky GraphQL query patterns",
+		Use:     "gql-painkiller",
+		Short:   "Static analysis for risky GraphQL query patterns",
+		Version: fmt.Sprintf("%s (commit %s, built %s)", version, commit, date),
 	}
 
 	rootCmd.PersistentFlags().StringVar(&configPath, "config", "gql-painkiller.config.yaml", "path to config file")
