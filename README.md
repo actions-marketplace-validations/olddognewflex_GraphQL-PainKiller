@@ -13,6 +13,8 @@ No surprises in production.
 
 ---
 
+![PR comment example](docs/pr-comment.png)
+
 ## 🧠 Why this exists
 
 If you’ve worked on a real GraphQL API, you’ve seen it:
@@ -24,6 +26,8 @@ If you’ve worked on a real GraphQL API, you’ve seen it:
 Most tools catch this **too late**.
 
 GraphQL Painkiller runs **at PR time**, so you catch problems before they merge.
+
+📹 [Watch the demo](https://cleanshot.com/share/VzBXplzb)
 
 ---
 
