@@ -27,7 +27,7 @@ Most tools catch this **too late**.
 
 GraphQL Painkiller runs **at PR time**, so you catch problems before they merge.
 
-📹 [Watch the demo](https://cleanshot.com/share/VzBXplzb)
+📹 [Watch the demo](https://cleanshot.com/share/cPD0D2tz)
 
 ---
 
