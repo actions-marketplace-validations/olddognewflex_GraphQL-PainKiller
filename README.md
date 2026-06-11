@@ -180,7 +180,7 @@ jobs:
 
 ---
 
-## 💰 Pricing (coming soon)
+## 💰 Pricing
 
 V1 is free while we validate.
 
@@ -190,6 +190,8 @@ Planned:
 - Paid → advanced rules, team configs, deeper analysis
 
 If this saves you from one production issue, it pays for itself.
+
+👉 [Get Painkiller Pro](https://buy.stripe.com/cNifZj9h67pJ5o1epf5Ne00)
 
 ---
 
