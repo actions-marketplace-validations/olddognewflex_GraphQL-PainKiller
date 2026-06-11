@@ -25,6 +25,57 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    - name: Resolve GraphQL Painkiller binary
+      shell: bash
+      env:
+        ACTION_REF: ${{ github.action_ref }}
+      run: |
+        set -e
+        REPO="olddognewflex/graphql-painkiller"
+
+        # Map runner OS/arch to GoReleaser asset naming
+        case "$RUNNER_OS" in
+          Linux)   OS="linux" ;;
+          macOS)   OS="darwin" ;;
+          Windows) OS="windows" ;;
+          *)       OS="" ;;
+        esac
+        case "$RUNNER_ARCH" in
+          X64)   ARCH="amd64" ;;
+          ARM64) ARCH="arm64" ;;
+          *)     ARCH="" ;;
+        esac
+
+        BIN="gql-painkiller"
+        [ "$OS" = "windows" ] && BIN="gql-painkiller.exe"
+
+        # Release archives drop the leading 'v' from the tag (v0.1.1 -> 0.1.1)
+        TAG="$ACTION_REF"
+        VERSION="${TAG#v}"
+
+        download_ok=0
+        if [ -n "$OS" ] && [ -n "$ARCH" ] && [ -n "$TAG" ]; then
+          [ "$OS" = "windows" ] && EXT="zip" || EXT="tar.gz"
+          ASSET="gql-painkiller_${VERSION}_${OS}_${ARCH}.${EXT}"
+          URL="https://github.com/${REPO}/releases/download/${TAG}/${ASSET}"
+          echo "Downloading prebuilt binary: $URL"
+          if curl -fsSL "$URL" -o "$ASSET"; then
+            if [ "$EXT" = "zip" ]; then
+              unzip -o "$ASSET" "$BIN" >/dev/null && download_ok=1 || download_ok=0
+            else
+              tar -xzf "$ASSET" "$BIN" && download_ok=1 || download_ok=0
+            fi
+          fi
+        fi
+
+        if [ "$download_ok" != "1" ]; then
+          echo "Prebuilt binary unavailable (ref='$TAG' os='$OS' arch='$ARCH'); building from source"
+          go build -o "$BIN" ./cmd/gql-painkiller
+        fi
+
+        chmod +x "$BIN"
+        echo "PAINKILLER_BIN=$PWD/$BIN" >> "$GITHUB_ENV"
+
     - name: Run GraphQL Painkiller
       shell: bash
       env:
@@ -32,14 +83,10 @@ runs:
       run: |
         set -e
 
-        if [ ! -f "./gql-painkiller" ]; then
-          go build -o gql-painkiller ./cmd/gql-painkiller
-        fi
-
-        ./gql-painkiller post-pr-comments ${{ inputs.analyze-path }} \
+        "$PAINKILLER_BIN" post-pr-comments ${{ inputs.analyze-path }} \
           --config ${{ inputs.config-path }} \
           --token "$GITHUB_TOKEN"
 
-        ./gql-painkiller analyze ${{ inputs.analyze-path }} \
+        "$PAINKILLER_BIN" analyze ${{ inputs.analyze-path }} \
           --config ${{ inputs.config-path }} \
           --fail-on ${{ inputs.fail-on }}
